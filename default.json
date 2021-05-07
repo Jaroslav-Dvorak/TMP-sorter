@@ -1,0 +1,54 @@
+{
+    "orig": {
+        "trackbars": {}
+    },
+    "marked": {
+        "trackbars": {
+            "offset": 0
+        }
+    },
+    "oppened": {
+        "trackbars": {
+            "kernel": 18
+        }
+    },
+    "blurred": {
+        "trackbars": {
+            "blur_val": 292
+        }
+    },
+    "differed": {
+        "trackbars": {
+            "bg_val": 1020
+        }
+    },
+    "cropped": {
+        "trackbars": {}
+    },
+    "unfolded": {
+        "trackbars": {}
+    },
+    "binarized": {
+        "trackbars": {
+            "thresh1": 60
+        }
+    },
+    "gabored": {
+        "trackbars": {
+            "kernel": 731,
+            "uhel": 0,
+            "sigma": 1020,
+            "lambd": 114,
+            "gamma": 0,
+            "psi": 0
+        }
+    },
+    "con_comp": {
+        "trackbars": {}
+    },
+    "evaluated": {
+        "trackbars": {
+            "dscore": 147
+        }
+    }
+}
