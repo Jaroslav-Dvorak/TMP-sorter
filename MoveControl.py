@@ -2,7 +2,6 @@ from time import perf_counter, time
 from copy import copy
 from gpiozero import LED, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
-from gpiozero.pins.local import LocalPiFactory
 from NonVolatile import defaultSet
 from is_rpi import is_rpi
 
@@ -11,7 +10,7 @@ class MoveControl:
 
     def __init__(self):
 
-        pin_factory = LocalPiFactory() if is_rpi() else PiGPIOFactory(host='10.83.1.1')
+        pin_factory = PiGPIOFactory(host='127.0.0.1') if is_rpi() else PiGPIOFactory(host='10.83.1.1')
 
         self.cam_connected = False
 

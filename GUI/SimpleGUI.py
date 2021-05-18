@@ -38,24 +38,25 @@ class SimpleGUI:
         self.tools.grid(row=1, column=0)
         self.frame_counter = Frame(self.tools, highlightbackground="black", highlightthickness=1)
         self.frame_counter.pack()
-        self.label_counter = Label(self.frame_counter, text="Počítadlo\nOK kusy", font=("Courier", 60), fg="green")
+        self.label_counter = Label(self.frame_counter, text="Počítadlo\nOK kusy", font=("Courier", 40), fg="green")
         self.label_counter.pack(side="left")
         self.counter = Label(self.frame_counter, text="", font=("Courier", 100), fg="blue")
         self.counter.pack(side="left")
-        self.button_counter_reset = Button(self.frame_counter, text="Reset\npočítadla", font=("Courier", 60), command=partial(self.callback_button, "counter_reset"))
+        self.button_counter_reset = Button(self.frame_counter, text="Reset\npočítadla", font=("Courier", 40), command=partial(self.callback_button, "counter_reset"))
         self.button_counter_reset.pack(side="right", anchor=W)
         self.cam_conn_label = Label(self.tools, text="KAMERA NEPŘIPOJENA", font=("Courier", 20), bg="red")
         self.cam_conn_label.pack()
-        self.evaluation_time = Label(self.tools, text="IMG time:: __ ms", font=("Courier", 20))
-        self.evaluation_time.pack()
-        self.plc_time = Label(self.tools, text="PLC time:__ ms", font=("Courier", 20))
-        self.plc_time.pack()
-        self.process_time = 0
-        self.gui_time = Label(self.tools, text="GUI time: __ ms", font=("Courier", 20))
-        self.gui_time.pack()
+        # self.evaluation_time = Label(self.tools, text="IMG time:: __ ms", font=("Courier", 20))
+        # self.evaluation_time.pack()
+        # self.plc_time = Label(self.tools, text="PLC time:__ ms", font=("Courier", 20))
+        # self.plc_time.pack()
+        # self.process_time = 0
+        # self.gui_time = Label(self.tools, text="GUI time: __ ms", font=("Courier", 20))
+        # self.gui_time.pack()
 
-        self.button_save = Button(self.tools, text="Potvrdit a uložit", highlightbackground='green', font=("Courier", 40), command=partial(self.callback_button, "submit"))
+        self.button_save = Button(self.tools, text="Potvrdit a uložit", font=("Courier", 40), command=partial(self.callback_button, "submit"))
         self.button_save.pack()
+        self.button_save.configure(highlightbackground='green')
 
         # self.button_exit = Button(self.root, text="Exit", font=("Courier", 30), command=partial(self.callback_button, "exit"))
         # self.button_exit.pack()
@@ -103,9 +104,9 @@ class SimpleGUI:
 
             self.counter.configure(text=f"{defaultSet.counter:4}")
             self.cam_conn_label.configure(background=self.state_color[movecontrol.cam_connected], text=self.camera_conn_textlist[movecontrol.cam_connected])
-            self.evaluation_time.configure(text=f"IMG time: {int(recognizer.process_time*1000):5} ms")
-            self.plc_time.configure(text=f"PLC time: {int(movecontrol.process_time * 1000):5} ms")
-            self.gui_time.configure(text=f"GUI time: {int(self.process_time * 1000):5} ms")
+            # self.evaluation_time.configure(text=f"IMG time: {int(recognizer.process_time*1000):5} ms")
+            # self.plc_time.configure(text=f"PLC time: {int(movecontrol.process_time * 1000):5} ms")
+            # self.gui_time.configure(text=f"GUI time: {int(self.process_time * 1000):5} ms")
 
             self.root.update()
             self.process_time = process_time() - start
