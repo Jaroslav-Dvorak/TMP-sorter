@@ -5,8 +5,8 @@ from copy import deepcopy as cp
 
 class CenterByTemplate:
     def __init__(self):
-        sizes = [n for n in range(140, 220, 5)]
-        self.templates = [np.zeros((size, size), np.uint8) for size in sizes]
+        self.sizes = [n for n in range(140, 220, 5)]
+        self.templates = [np.zeros((size, size), np.uint8) for size in self.sizes]
         for template in self.templates:
             cv2.circle(img=template,
                        center=((template.shape[0]) // 2, (template.shape[1]) // 2),
@@ -150,10 +150,6 @@ class Gabor:
         g_kernel = cv2.getGaborKernel(kernel, sigma, uhel, lambd, gamma, psi, ktype=cv2.CV_32F)
         gabor = cv2.filter2D(img, -1, g_kernel)
 
-        # f = np.fft.fft2(img)
-        # fshift = np.fft.fftshift(f)
-        # magnitude_spectrum = 20 * np.log(np.abs(fshift))
-        # magnitude_spectrum = np.asarray(magnitude_spectrum, dtype=np.uint8)
         img = gabor
 
         img = cv2.bitwise_not(img)
@@ -186,93 +182,123 @@ class ConComponents:
 
         img[:, 60:] = 0
 
+
         nb_components, labels, stats, centroids = cv2.connectedComponentsWithStats(img, connectivity=8)
         heights = stats[1:, cv2.CC_STAT_HEIGHT]
-        # widths = stats[1:, cv2.CC_STAT_WIDTH]
-        # tops = stats[1:, cv2.CC_STAT_TOP]
-        # lefts = stats[1:, cv2.CC_STAT_LEFT]
-        # centroids = centroids[1:]
-        # nb_components = nb_components - 1
+        widths = stats[1:, cv2.CC_STAT_WIDTH]
+        tops = stats[1:, cv2.CC_STAT_TOP]
+        bottoms = tops + heights
+        lefts = stats[1:, cv2.CC_STAT_LEFT]
+        rights = lefts + widths
+        x_axises = lefts + widths//2
+        centroids = centroids[1:]
+        areas = stats[1: cv2.CC_STAT_AREA]
 
         big = 30
         middle = 20
 
-        big_groups = np.where(heights >= big)
-        big_groups = np.add(big_groups, 1)[0]
-        middle_groups = np.where(np.logical_and(heights >= middle, heights < big))
-        middle_groups = np.add(middle_groups, 1)[0]
-        small_groups = np.where(heights < middle)
-        small_groups = np.add(small_groups, 1)[0]
+        big_groups_index = np.where(heights >= big)
+        big_groups = np.add(big_groups_index, 1)[0]
+        middle_groups_index = np.where(np.logical_and(heights >= middle, heights < big))
+        middle_groups = np.add(middle_groups_index, 1)[0]
+        small_groups_index = np.where(heights < middle)
+        small_groups = np.add(small_groups_index, 1)[0]
 
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+        sectors_l = np.zeros(img.shape[0])
+        sectors_r = np.zeros(img.shape[0])
+        if len(rights[big_groups_index]) > 0:
+
+            right = max(rights[big_groups_index])
+            half = right//2
+            # img[:, half:half+1] = blue
+            # img[:, right:right+1] = blue
+
+            left_cons = np.where(x_axises < half)
+            right_cons = np.where((half <= x_axises) & (x_axises <= right))
+            groups = dict(
+                left_bigs=np.intersect1d(left_cons, big_groups_index),
+                left_middles=np.intersect1d(left_cons, middle_groups_index),
+                left_smalls=np.intersect1d(left_cons, small_groups_index),
+                right_bigs=np.intersect1d(right_cons, big_groups_index),
+                right_middles=np.intersect1d(right_cons, middle_groups_index),
+                right_smalls=np.intersect1d(right_cons, small_groups_index)
+            )
+
+            big_score = 1
+            middle_score = 0.7
+            small_score = 0.1
+
+            for group, indexes in groups.items():
+                for index in indexes:
+                    if group == "left_bigs":
+                        sectors_l[tops[index]:bottoms[index]] += big_score
+                    if group == "left_middles":
+                        sectors_l[tops[index]:bottoms[index]] += middle_score
+                    if group == "left_smalls":
+                        sectors_l[tops[index]:bottoms[index]] += small_score
+
+                    if group == "right_bigs":
+                        sectors_r[tops[index]:bottoms[index]] += big_score
+                    if group == "right_middles":
+                        sectors_r[tops[index]:bottoms[index]] += middle_score
+                    if group == "right_smalls":
+                        sectors_r[tops[index]:bottoms[index]] += small_score
+
+        score = (sectors_l, sectors_r)
         loc_big = np.where(np.isin(labels, big_groups))
         loc_middle = np.where(np.isin(labels, middle_groups))
         loc_small = np.where(np.isin(labels, small_groups))
 
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
         img[loc_big] = green
         img[loc_middle] = orange
         img[loc_small] = red
-
-        img[:, 30:31] = blue
-        img[50:51, :60] = blue
-
-        sectors = {
-            "tl": {"img": img[:50, :30]},
-            "tr": {"img": img[:50, 30:60]},
-            "bl": {"img": img[50:100, :30]},
-            "br": {"img": img[50:100, 30:60]}
-                  }
-
-        # imgstats = np.zeros((250, 250, 3), dtype=np.uint8)
-        score = {}
-        for sector, cont in sectors.items():
-            greens = (cont["img"] == green).all(axis=2).sum()
-            oranges = (cont["img"] == orange).all(axis=2).sum()
-            reds = (cont["img"] == red).all(axis=2).sum()
-
-            greens *= 1
-            oranges *= 1.3
-            reds *= 1.5
-
-            score[sector] = (greens + oranges + reds)
-
-            # sectors[sector]["score"] = score
-            # Commons["score"][sector] = score
-            # print(sector, score)
-
         self.connected_comp = img
         return score
 
 
 class Evaluate:
     def __init__(self):
-        self.blue = [0, 0, 255]
+        self.blue = [51, 153, 255]
         self.green = [0, 255, 0]
         self.red = [255, 0, 0]
 
         self.blank = np.zeros((100, 100, 3), np.uint8)
-        self.blank[:, 32:33] = self.blue
-        self.blank[50:51, :66] = self.blue
-        self.blank[:, 65:66] = self.blue
+
+        # self.blank[:, 32:33] = self.blue
+        # self.blank[50:51, :66] = self.blue
+        # self.blank[:, 65:66] = self.blue
 
         self.eval_res = np.zeros((100, 100), np.uint8)
 
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.fontScale = 0.5
         self.lineType = 1
-        self.scores_pos = {"tl": (1, 28), "tr": (34, 28), "bl": (1, 78), "br": (34, 78), "dscore": (67, 28)}
+        self.scores_pos = {"zalis": (35, 60), "uzaver": (35, 90), "dscore": (35, 30)}
+
+        cv2.putText(self.blank, "hranice vad:", (1, 15), self.font, self.fontScale, self.blue, self.lineType)
+        cv2.putText(self.blank, "vady zalis:", (1, 45), self.font, self.fontScale, self.blue, self.lineType)
+        cv2.putText(self.blank, "vady uzaver:", (1, 75), self.font, self.fontScale, self.blue, self.lineType)
 
     def compute(self, score, dscore):
-
-        OK = True
+        dscore = int(dscore / 1020 * 100)
         self.eval_res = cp(self.blank)
-        for sector, score in score.items():
-            if score < dscore:
-                cv2.putText(self.eval_res, str(int(score)), self.scores_pos[sector], self.font, self.fontScale, self.red, self.lineType)
-                OK = False
-            else:
-                cv2.putText(self.eval_res, str(int(score)), self.scores_pos[sector], self.font, self.fontScale,  self.green, self.lineType)
+        vady_zalis = len(score[0][score[0] <= 0.7])
+        vady_uzaver = len(score[1][score[1] <= 0.5])
+        ok_zalis = not(vady_zalis > dscore)
+        ok_uzaver = not(vady_uzaver > dscore)
+        OK = ok_zalis and ok_uzaver
+
+        if ok_zalis:
+            cv2.putText(self.eval_res, str(vady_zalis), self.scores_pos["zalis"], self.font, self.fontScale, self.green, self.lineType)
+        else:
+            cv2.putText(self.eval_res, str(vady_zalis), self.scores_pos["zalis"], self.font, self.fontScale, self.red, self.lineType)
+
+        if ok_uzaver:
+            cv2.putText(self.eval_res, str(vady_uzaver), self.scores_pos["uzaver"], self.font, self.fontScale, self.green, self.lineType)
+        else:
+            cv2.putText(self.eval_res, str(vady_uzaver), self.scores_pos["uzaver"], self.font, self.fontScale, self.red, self.lineType)
 
         if OK:
             cv2.putText(self.eval_res, str(dscore), self.scores_pos["dscore"], self.font, self.fontScale, self.green, self.lineType)

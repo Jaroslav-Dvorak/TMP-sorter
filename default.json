@@ -35,10 +35,10 @@
     },
     "gabored": {
         "trackbars": {
-            "kernel": 731,
+            "kernel": 473,
             "uhel": 0,
             "sigma": 1020,
-            "lambd": 114,
+            "lambd": 979,
             "gamma": 0,
             "psi": 0
         }
@@ -48,7 +48,7 @@
     },
     "evaluated": {
         "trackbars": {
-            "dscore": 147
+            "dscore": 111
         }
     }
 }

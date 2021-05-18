@@ -11,7 +11,7 @@ class MoveControl:
 
     def __init__(self):
 
-        pin_factory = LocalPiFactory() if is_rpi() else PiGPIOFactory(host='192.168.10.51')
+        pin_factory = LocalPiFactory() if is_rpi() else PiGPIOFactory(host='10.83.1.1')
 
         self.cam_connected = False
 

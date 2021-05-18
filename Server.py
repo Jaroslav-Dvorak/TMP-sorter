@@ -10,6 +10,7 @@ from is_rpi import is_rpi
 def server():
     authorizer = DummyAuthorizer()
     homedir = "/mnt/ramdisk" if is_rpi() else './FTP'
+    homedir = "/mnt/ramdisk" if is_rpi() else '/Volumes/RAM_drive/'
     authorizer.add_user('IV', '12345', homedir=homedir, perm='elradfmwMT')
     handler = MyHandler
     handler.authorizer = authorizer

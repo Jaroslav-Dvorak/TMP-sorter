@@ -9,7 +9,7 @@ from NonVolatile import defaultSet
 from MoveControl import movecontrol
 
 
-class GUI:
+class AdvGUI:
     def __init__(self):
 
         self.settings = defaultSet.settings
@@ -112,4 +112,4 @@ class GUI:
             self.process_time = process_time() - start
 
     def callback_exit(self):
-        self.root.quit()
+        self.root.destroy()
