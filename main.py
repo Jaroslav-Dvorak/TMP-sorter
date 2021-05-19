@@ -7,6 +7,11 @@ from Server import server
 import platform    # For getting the operating system name
 import subprocess  # For executing a shell command
 
+# TODO:
+# - tlačítko uložit a přenést je na začátku červené
+# - dodělat tlačítko pro otočení stolu
+# - dodělat diagnostiku
+
 
 def ping(host):
     """
