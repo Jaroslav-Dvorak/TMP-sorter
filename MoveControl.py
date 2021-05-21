@@ -1,4 +1,4 @@
-from time import perf_counter, time
+from time import perf_counter, time, sleep
 from copy import copy
 from gpiozero import LED, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
@@ -31,6 +31,8 @@ class MoveControl:
         self.badone = None
 
         self.process_time = 0
+
+        self.stul_man = False
 
     def run(self):
         allow_run = False
@@ -103,6 +105,10 @@ class MoveControl:
             if stul_command and not i_stul_rot and i_stul_arr and i_cyl_1_0 and i_cyl_2_0 and allow_run and not self.Pist1.value and not self.Pist1.value:
                 o_step = True
                 counting_ok_piece = True
+            if not i_switch and self.stul_man and i_stul_arr and i_cyl_1_0 and i_cyl_2_0 and not self.Pist1.value and not self.Pist1.value:
+                self.stul_man = False
+                o_step = True
+
             if i_stul_rot and not i_stul_arr:
                 o_aret = True
                 stul_command = False
@@ -116,6 +122,8 @@ class MoveControl:
             self.setter(self.Pist2, o_cyl_2)
 
             self.process_time = perf_counter() - start
+
+            sleep(0.01)
 
     @staticmethod
     def setter(output, state):

@@ -54,29 +54,31 @@ class SimpleGUI:
         # self.gui_time = Label(self.tools, text="GUI time: __ ms", font=("Courier", 20))
         # self.gui_time.pack()
 
-        self.button_save = Button(self.tools, text="Potvrdit a uložit", font=("Courier", 40), command=partial(self.callback_button, "submit"))
+        self.button_save = Button(self.tools, text="Potvrdit a uložit", font=("Courier", 40), command=partial(self.callback_button, "submit"), fg="green")
         self.button_save.pack()
-        self.button_save.configure(highlightbackground='green')
 
-        # self.button_exit = Button(self.root, text="Exit", font=("Courier", 30), command=partial(self.callback_button, "exit"))
-        # self.button_exit.pack()
-
+        self.button_stul = Button(self.root, text="OTOČNÝ\nSTŮL", font=("Courier", 30), command=partial(self.callback_button, "stul"))
+        self.button_stul.grid(row=1, column=2,  sticky="nsew")
         self.run()
-
-    def callback_scale(self, view, which, val):
-        self.settings["evaluated"]["trackbars"]["dscore"] = int(float(val))
-        self.button_save.configure(highlightbackground='red')
 
     def callback_exit(self):
         self.root.destroy()
+
+    def callback_scale(self, view, which, val):
+        if self.settings["evaluated"]["trackbars"]["dscore"] != int(float(val)):
+            self.button_save.configure(fg="red")
+        self.settings["evaluated"]["trackbars"]["dscore"] = int(float(val))
 
     def callback_button(self, name):
         if name == "submit":
             recognizer.settings = cp(self.settings)
             defaultSet.settings = cp(self.settings)
-            self.button_save.configure(highlightbackground='green')
+            self.button_save.configure(fg="green")
         if name == "counter_reset":
             defaultSet.counter = 0
+
+        movecontrol.stul_man = (name == "stul")
+
         if name == "exit":
             self.root.destroy()
 
