@@ -1,6 +1,5 @@
 from time import perf_counter
-from NonVolatile import defaultSet
-from VisioCore import *
+from Elektrolyt.VisioCore import *
 
 
 class ImageRecognizer:
@@ -73,6 +72,3 @@ class GuiProvider(ImageRecognizer):
             "evaluated": self.eval.eval_res
         }
 
-
-recognizer = Decider(defaultSet.settings)
-gui_computer = GuiProvider(defaultSet.settings)

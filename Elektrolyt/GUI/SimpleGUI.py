@@ -1,20 +1,19 @@
-from tkinter import Tk, Frame, Button, Label, NW, W, VERTICAL, X, Scale
-# from tkinter.ttk import Scale
+from tkinter import Tk, Frame, Button, Label, W, VERTICAL, Scale
 from time import process_time
 from copy import deepcopy as cp
 from functools import partial
-from PIL import Image, ImageTk
-from ImageRecognizer import recognizer, gui_computer
-from NonVolatile import defaultSet
-from MoveControl import movecontrol
 import cv2
-import numpy as np
+from PIL import Image, ImageTk
+
+from instances import movecontrol
+from instances import recognizer, gui_computer
+from instances import settings, counter
 
 
 class SimpleGUI:
     def __init__(self):
 
-        self.settings = defaultSet.settings
+        self.settings = settings.settings
         self.state_color = {True: "#4fc261", False: "#e04646"}
         self.camera_conn_textlist = {True: "KAMERA PŘIPOJENA", False: "KAMERA NEPŘIPOJENA"}
 
@@ -22,6 +21,7 @@ class SimpleGUI:
         self.root.protocol("WM_DELETE_WINDOW", self.callback_exit)
         self.root.attributes("-fullscreen", True)
         self.root.configure(background='black')
+        self.root.option_add('*TCombobox*Listbox.font', ("Courier", 40))
 
         self.size_h = 750
         self.view1 = Label()
@@ -36,6 +36,12 @@ class SimpleGUI:
 
         self.tools = Frame(self.root, highlightbackground="black", highlightthickness=1)
         self.tools.grid(row=1, column=0)
+
+        self.prog_label = Label(self.tools, text="Program: ELEKTROLYT", font=("Courier", 40))
+        self.prog_label.pack()
+        # self.program = Button(self.program_sel, text="Změnit\nProgram", font=("Courier", 40), command=self.callback_exit)
+        # self.program.grid(row=0, column=1)
+
         self.frame_counter = Frame(self.tools, highlightbackground="black", highlightthickness=1)
         self.frame_counter.pack()
         self.label_counter = Label(self.frame_counter, text="Počítadlo\nOK kusy", font=("Courier", 40), fg="green")
@@ -46,13 +52,6 @@ class SimpleGUI:
         self.button_counter_reset.pack(side="right", anchor=W)
         self.cam_conn_label = Label(self.tools, text="KAMERA NEPŘIPOJENA", font=("Courier", 20), bg="red")
         self.cam_conn_label.pack()
-        # self.evaluation_time = Label(self.tools, text="IMG time:: __ ms", font=("Courier", 20))
-        # self.evaluation_time.pack()
-        # self.plc_time = Label(self.tools, text="PLC time:__ ms", font=("Courier", 20))
-        # self.plc_time.pack()
-        # self.process_time = 0
-        # self.gui_time = Label(self.tools, text="GUI time: __ ms", font=("Courier", 20))
-        # self.gui_time.pack()
 
         self.button_save = Button(self.tools, text="Potvrdit a uložit", font=("Courier", 40), command=partial(self.callback_button, "submit"), fg="green")
         self.button_save.pack()
@@ -72,10 +71,10 @@ class SimpleGUI:
     def callback_button(self, name):
         if name == "submit":
             recognizer.settings = cp(self.settings)
-            defaultSet.settings = cp(self.settings)
+            settings.settings = cp(self.settings)
             self.button_save.configure(fg="green")
         if name == "counter_reset":
-            defaultSet.counter = 0
+            settings.counter = 0
 
         movecontrol.stul_man = (name == "stul")
 
@@ -104,7 +103,7 @@ class SimpleGUI:
             stats = ImageTk.PhotoImage(image=stats)
             self.view3.configure(image=stats)
 
-            self.counter.configure(text=f"{defaultSet.counter:4}")
+            self.counter.configure(text=f"{counter.counter:4}")
             self.cam_conn_label.configure(background=self.state_color[movecontrol.cam_connected], text=self.camera_conn_textlist[movecontrol.cam_connected])
             # self.evaluation_time.configure(text=f"IMG time: {int(recognizer.process_time*1000):5} ms")
             # self.plc_time.configure(text=f"PLC time: {int(movecontrol.process_time * 1000):5} ms")

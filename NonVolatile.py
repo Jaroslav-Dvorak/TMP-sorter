@@ -2,12 +2,10 @@ import json
 from copy import deepcopy as cp
 
 
-class NonVolatile:
-    def __init__(self, settings_filename, counter_filename):
-        self.settings_filename = settings_filename + ".json"
-        self.counter_filename = counter_filename + ".txt"
+class Settings:
+    def __init__(self, filename):
+        self.settings_filename = filename + ".json"
         self.init_settings()
-        self.init_counter()
 
     def init_settings(self):
         try:
@@ -41,7 +39,13 @@ class NonVolatile:
         except Exception as e:
             print(e)
         self._settings = settings
-    #####################################################
+
+
+class Counter:
+    def __init__(self, filename):
+
+        self.counter_filename = filename + ".txt"
+        self.init_counter()
 
     def init_counter(self):
         try:
@@ -63,6 +67,3 @@ class NonVolatile:
         except Exception as e:
             print(e)
         self._counter = counter
-
-
-defaultSet = NonVolatile("default", "counter")

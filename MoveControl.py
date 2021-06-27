@@ -2,7 +2,6 @@ from time import perf_counter, time, sleep
 from copy import copy
 from gpiozero import LED, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
-from NonVolatile import defaultSet
 from is_rpi import is_rpi
 
 
@@ -35,6 +34,7 @@ class MoveControl:
         self.stul_man = False
 
     def run(self):
+        from instances import counter
         allow_run = False
         f_switch = False
         f_receivered = False
@@ -92,7 +92,7 @@ class MoveControl:
                 o_cyl_1 = False
                 if counting_ok_piece:
                     counting_ok_piece = False
-                    defaultSet.counter += 1
+                    counter.counter += 1
             if i_cyl_2_1:
                 o_cyl_2 = False
 
@@ -133,4 +133,3 @@ class MoveControl:
             output.off()
 
 
-movecontrol = MoveControl()

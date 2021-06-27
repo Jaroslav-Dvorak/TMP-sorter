@@ -1,11 +1,11 @@
 from threading import Thread
 from time import sleep
-from GUI.StartGUI import StartGUI
-from MoveControl import movecontrol
-from Server import server
-
 import platform    # For getting the operating system name
 import subprocess  # For executing a shell command
+
+from instances import movecontrol, gui
+from Server import server
+
 
 # TODO
 # - dodělat diagnostiku
@@ -35,4 +35,4 @@ if __name__ == "__main__":
     t_server.start()
     t_movecontrol = Thread(target=movecontrol.run)
     t_movecontrol.start()
-    gui = StartGUI()
+    gui()

@@ -1,7 +1,7 @@
 from tkinter import Tk, Button, Label
 from functools import partial
-from GUI.AdvGUI import AdvGUI
-from GUI.SimpleGUI import SimpleGUI
+from CHK_N0144U.GUI.AdvGUI import AdvGUI
+from CHK_N0144U.GUI.SimpleGUI import SimpleGUI
 
 
 class StartGUI:

@@ -1,18 +1,19 @@
-from tkinter import Tk, Frame, Button, Label, NW, W, VERTICAL, X
+from tkinter import Tk, Frame, Button, Label, NW, W, VERTICAL
 from tkinter.ttk import Scale
 from time import process_time
 from copy import deepcopy as cp
 from functools import partial
 from PIL import Image, ImageTk
-from ImageRecognizer import recognizer, gui_computer
-from NonVolatile import defaultSet
-from MoveControl import movecontrol
+
+from instances import movecontrol
+from instances import recognizer, gui_computer
+from instances import settings, counter
 
 
 class AdvGUI:
     def __init__(self):
 
-        self.settings = defaultSet.settings
+        self.settings = settings.settings
 
         self.geometry = '1920x1080'
         self.title = "Visio"
@@ -56,6 +57,9 @@ class AdvGUI:
         self.frame_counter = Frame(self.tools, highlightbackground="black", highlightthickness=1)
         self.frame_counter.pack()
 
+        self.prog_label = Label(self.tools, text="Program: ELEKTROLYT", font=("Courier", 40))
+        self.prog_label.pack()
+
         self.label_counter = Label(self.frame_counter, text="Počítadlo\nOK kusy", font=("Courier", 36), fg="green")
         self.label_counter.pack(side="left")
         self.counter = Label(self.frame_counter, text="", font=("Courier", 60), fg="blue")
@@ -85,10 +89,10 @@ class AdvGUI:
     def callback_button(self, name):
         if name == "submit":
             recognizer.settings = cp(self.settings)
-            defaultSet.settings = cp(self.settings)
+            settings.settings = cp(self.settings)
             self.button_save.configure(highlightbackground='green')
         if name == "counter_reset":
-            defaultSet.counter = 0
+            settings.counter = 0
 
     def run(self):
         while True:
@@ -102,7 +106,7 @@ class AdvGUI:
                 images[view] = ImageTk.PhotoImage(image=images[view])
                 self.views[view].configure(image=images[view])
 
-            self.counter.configure(text=f"{defaultSet.counter:4}")
+            self.counter.configure(text=f"{counter.counter:4}")
             self.cam_conn_label.configure(background=self.state_color[movecontrol.cam_connected], text=self.camera_conn_textlist[movecontrol.cam_connected])
             self.evaluation_time.configure(text=f"IMG time: {int(recognizer.process_time*1000):5} ms")
             self.plc_time.configure(text=f"PLC time: {int(movecontrol.process_time * 1000):5} ms")

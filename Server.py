@@ -2,9 +2,11 @@ import os
 from pyftpdlib.servers import FTPServer
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
-from ImageRecognizer import recognizer, gui_computer
-from MoveControl import movecontrol
+
+from instances import movecontrol
 from is_rpi import is_rpi
+
+from instances import recognizer, gui_computer
 
 
 def server():
@@ -45,7 +47,6 @@ class MyHandler(FTPHandler):
         movecontrol.badone = not ok
         gui_computer.load_imge(file)
         os.remove(file)
-        pass
 
     def on_incomplete_file_sent(self, file):
         # do something when a file is partially sent
