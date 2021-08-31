@@ -74,7 +74,7 @@ class SimpleGUI:
             settings.settings = cp(self.settings)
             self.button_save.configure(fg="green")
         if name == "counter_reset":
-            settings.counter = 0
+            counter.counter = 0
 
         movecontrol.stul_man = (name == "stul")
 

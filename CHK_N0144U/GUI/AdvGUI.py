@@ -90,7 +90,7 @@ class AdvGUI:
             settings.settings = cp(self.settings)
             self.button_save.configure(highlightbackground='green')
         if name == "counter_reset":
-            settings.counter = 0
+            counter.counter = 0
 
     def run(self):
         while True:
