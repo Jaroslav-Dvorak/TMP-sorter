@@ -3,31 +3,6 @@ import numpy as np
 from copy import deepcopy as cp
 
 
-class Negative:
-    def __init__(self):
-        self.negatived = np.zeros((100, 100), np.uint8)
-
-    def compute(self, img):
-        img = cp(img)
-        img = cv2.bitwise_not(img)
-        self.negatived = img
-        return img
-
-
-class Opening:
-    def __init__(self):
-        self.opened_img = np.zeros((100, 100), np.uint8)
-
-    def compute(self, img, open_kernel):
-        open_kernel = open_kernel // 40
-        img = cp(img)
-        img = cv2.bitwise_not(img)
-        opening = (open_kernel, open_kernel)
-        img = cv2.morphologyEx(img, cv2.MORPH_OPEN, np.ones(opening, np.uint8))
-        img = cv2.bitwise_not(img)
-        self.opened_img = img
-        return img
-
 
 class CenterByTemplate:
     def __init__(self):
@@ -40,8 +15,15 @@ class CenterByTemplate:
                        color=255,
                        thickness=-1)
 
-    def compute(self, img):
-        img = cp(img)
+        self.opened_img = np.zeros((100, 100), np.uint8)
+        self.marked_circle = np.zeros((100, 100), np.uint8)
+
+    def compute(self, img, open_kernel):
+        orig_img = cp(img)
+        img = cv2.bitwise_not(img)
+        opening = (open_kernel, open_kernel)
+        img = cv2.morphologyEx(img, cv2.MORPH_OPEN, np.ones(opening, np.uint8))
+        img = cv2.bitwise_not(img)
 
         max_val_best = -100
 
@@ -66,20 +48,13 @@ class CenterByTemplate:
             top_left[0] + (bottom_right[0] - top_left[0]) // 2, top_left[1] + (bottom_right[1] - top_left[1]) // 2)
         radius = w // 2
 
+        self.opened_img = img
+        orig_img = cv2.cvtColor(orig_img, cv2.COLOR_GRAY2BGR)
+        cv2.circle(orig_img, center, radius, (0, 255, 0), 3)
+        self.marked_circle = orig_img
+
         return center, radius
 
-
-class MarkCircle:
-    def __init__(self):
-        self.marked_circle = np.zeros((100, 100), np.uint8)
-
-    def compute(self, img, coordinations):
-        img = cp(img)
-        center, radius = coordinations
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        cv2.circle(img, center, radius, (0, 255, 0), 3)
-        self.marked_circle = img
-        return img
 
 class Blur:
     def __init__(self):
@@ -114,11 +89,10 @@ class CropCircle:
     def __init__(self):
         self.cropped = np.zeros((100, 100), np.uint8)
 
-    def compute(self, img, coordinations, offset):
+    def compute(self, img, coordinations):
         img = cp(img)
         center, radius = coordinations
-        offset = offset - 1020//2
-        offset = offset // 50
+        offset = 10
         try:
             offset_radius = radius + offset
             crop = img[center[1]-offset_radius:center[1]+offset_radius, center[0]-offset_radius:center[0]+offset_radius]
@@ -130,20 +104,6 @@ class CropCircle:
             return self.cropped
         self.cropped = crop
         return crop
-
-
-class Mask:
-    def __init__(self):
-        self.masked = np.zeros((100, 100), np.uint8)
-
-    def compute(self, img):
-        img = cp(img)
-        mask = np.zeros_like(img)
-        mask = cv2.circle(mask, (50, 50), 50, (255), -1)
-        w = np.where(mask == 0)
-        img[w] = mask[w]
-        self.masked = img
-        return img
 
 
 class Unfold:
@@ -170,18 +130,6 @@ class BinAdaptive1:
         thresh1 = thresh1 // 4
         img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
                                     cv2.THRESH_BINARY, 11, thresh1)
-        self.binarized = img
-        return img
-
-
-class Binarize:
-    def __init__(self):
-        self.binarized = np.zeros((100, 100), np.uint8)
-
-    def compute(self, img, thresh1):
-        img = cp(img)
-        thresh1 = thresh1 // 4
-        ret, img = cv2.threshold(img, thresh1, 255, cv2.THRESH_BINARY)
         self.binarized = img
         return img
 
@@ -318,60 +266,6 @@ class ConComponents:
         img[loc_small] = red
         self.connected_comp = img
         return score
-
-
-class Result:
-    def __init__(self):
-        self.result = np.zeros((100, 100, 3), np.uint8)
-
-    def compute(self, orig_img, defects_img):
-        img = cp(orig_img)
-        defects_img = cp(defects_img)
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        w = np.where(defects_img == 255)
-        img[w] = (255, 0, 0)
-        self.result = img
-        return img
-
-
-class Evaluation:
-    def __init__(self):
-        self.blue = [51, 153, 255]
-        self.green = [0, 255, 0]
-        self.red = [255, 0, 0]
-
-        self.blank = np.zeros((100, 100, 3), np.uint8)
-        self.eval_res = np.zeros((100, 100), np.uint8)
-
-        self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.fontScale = 0.5
-        self.lineType = 1
-        self.scores_pos = {"zalis": (35, 60), "uzaver": (35, 90), "dscore": (35, 30)}
-
-        cv2.putText(self.blank, "citlivost:", (1, 15), self.font, self.fontScale, self.blue, self.lineType)
-        cv2.putText(self.blank, "hranice:", (1, 45), self.font, self.fontScale, self.blue, self.lineType)
-        cv2.putText(self.blank, "stred:", (1, 75), self.font, self.fontScale, self.blue, self.lineType)
-
-    def compute(self, defect_img, center, sensitivity, thresh):
-        sensitivity //= 40
-        thresh = int(thresh * 1)
-        self.eval_res = cp(self.blank)
-        defects = cv2.countNonZero(defect_img)
-        ok_defects = defects < thresh
-        ok_center = (100 < center[0] < 200) and (100 < center[1] < 150)
-        cv2.putText(self.eval_res, f"{sensitivity}", (35, 30), self.font, self.fontScale, self.blue, self.lineType)
-        cv2.putText(self.eval_res, f"{thresh}<", (10, 60), self.font, self.fontScale, self.blue, self.lineType)
-
-        if ok_defects:
-            cv2.putText(self.eval_res, f"{defects}", (60, 60), self.font, self.fontScale, self.green, self.lineType)
-        else:
-            cv2.putText(self.eval_res, f"{defects}", (60, 60), self.font, self.fontScale, self.red, self.lineType)
-
-        if ok_center:
-            cv2.putText(self.eval_res, "OK", (40, 90), self.font, self.fontScale, self.green, self.lineType)
-        else:
-            cv2.putText(self.eval_res, "MIMO", (30, 90), self.font, self.fontScale, self.red, self.lineType)
-        return (ok_defects and ok_center)
 
 
 class Evaluate:

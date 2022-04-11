@@ -3,52 +3,40 @@
         "trackbars": {}
     },
     "marked": {
+        "trackbars": {}
+    },
+    "oppened_center": {
         "trackbars": {
-            "offset": 0
+            "kernel": 931
         }
     },
-    "oppened": {
+    "oppened_proc": {
         "trackbars": {
-            "kernel": 18
-        }
-    },
-    "blurred": {
-        "trackbars": {
-            "blur_val": 292
-        }
-    },
-    "differed": {
-        "trackbars": {
-            "bg_val": 1020
+            "kernel": 787
         }
     },
     "cropped": {
-        "trackbars": {}
-    },
-    "unfolded": {
-        "trackbars": {}
-    },
-    "binarized": {
         "trackbars": {
-            "thresh1": 60
+            "offset": 299
         }
     },
-    "gabored": {
-        "trackbars": {
-            "kernel": 473,
-            "uhel": 0,
-            "sigma": 1020,
-            "lambd": 979,
-            "gamma": 0,
-            "psi": 0
-        }
-    },
-    "con_comp": {
+    "negatived": {
         "trackbars": {}
     },
-    "evaluated": {
+    "masked": {
+        "trackbars": {}
+    },
+    "binariz": {
         "trackbars": {
-            "dscore": 310
+            "thresh": 255
+        }
+    },
+    "result": {
+        "trackbars": {}
+    },
+    "evaluation": {
+        "trackbars": {
+            "thresh": 255
         }
     }
 }

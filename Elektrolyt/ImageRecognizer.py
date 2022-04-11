@@ -6,15 +6,16 @@ class ImageRecognizer:
     def __init__(self, settings, resolution=(240, 320)):
         self.settings = settings
 
+        self.open_for_center = Opening()
         self.centertempl = CenterByTemplate()
-        self.blur = Blur()
-        self.diff = DiffOrig()
+        self.mark = MarkCircle()
+        self.open_for_proc = Opening()
+        self.negative = Negative()
         self.crop = CropCircle()
-        self.unfold = Unfold()
-        self.binarize = BinAdaptive1()
-        self.gabor = Gabor()
-        self.con_comp = ConComponents()
-        self.eval = Evaluate()
+        self.mask = Mask()
+        self.binarize = Binarize()
+        self.result = Result()
+        self.eval = Evaluation()
 
         blank = np.zeros(resolution, np.uint8)
         self.input_img = blank
@@ -27,17 +28,20 @@ class ImageRecognizer:
     def evaluation(self):
         start = perf_counter()
         input_img = self.input_img
-        center, radius = self.centertempl.compute(input_img, self.settings["oppened"]["trackbars"]["kernel"])
-        blurred = self.blur.compute(input_img, self.settings["blurred"]["trackbars"]["blur_val"])
-        differed = self.diff.compute(input_img, blurred, self.settings["differed"]["trackbars"]["bg_val"])
-        cropped = self.crop.compute(differed, (center, radius))
-        unfolded = self.unfold.compute(cropped)
-        binarized = self.binarize.compute(unfolded, self.settings["binarized"]["trackbars"]["thresh1"])
-        gabored = self.gabor.compute(binarized, self.settings["gabored"]["trackbars"])
-        connected = self.con_comp.compute(gabored)
-        evaluated = self.eval.compute(connected, self.settings["evaluated"]["trackbars"]["dscore"])
+
+        open_for_center = self.open_for_center.compute(input_img, self.settings["oppened_center"]["trackbars"]["kernel"])
+        center, radius = self.centertempl.compute(open_for_center)
+        marked = self.mark.compute(input_img, (center, radius))
+        opened = self.open_for_proc.compute(input_img, self.settings["oppened_proc"]["trackbars"]["kernel"])
+        cropped = self.crop.compute(opened, (center, radius), self.settings["cropped"]["trackbars"]["offset"])
+        negatived = self.negative.compute(cropped)
+        masked = self.mask.compute(negatived)
+        binarized = self.binarize.compute(masked, self.settings["binariz"]["trackbars"]["thresh"])
+        result = self.result.compute(masked, binarized)
+        evaluation = self.eval.compute(binarized, center, self.settings["oppened_proc"]["trackbars"]["kernel"], self.settings["evaluation"]["trackbars"]["thresh"])
+
         self.process_time = perf_counter() - start
-        return evaluated
+        return evaluation
 
 
 class Decider(ImageRecognizer):
@@ -60,15 +64,14 @@ class GuiProvider(ImageRecognizer):
         self.evaluation()
         return {
             "orig": self.input_img,
-            "marked": self.centertempl.marked_circle,
-            "oppened": self.centertempl.opened_img,
-            "blurred": self.blur.blurred,
-            "differed": self.diff.differed,
+            "oppened_center": self.open_for_center.opened_img,
+            "marked": self.mark.marked_circle,
             "cropped": self.crop.cropped,
-            "unfolded": self.unfold.unfolded,
-            "binarized": self.binarize.binarized,
-            "gabored": self.gabor.gabored,
-            "con_comp": self.con_comp.connected_comp,
-            "evaluated": self.eval.eval_res
+            "oppened_proc": self.open_for_proc.opened_img,
+            "negatived": self.negative.negatived,
+            "masked": self.mask.masked,
+            "binariz": self.binarize.binarized,
+            "result": self.result.result,
+            "evaluation": self.eval.eval_res
         }
 
