@@ -3,6 +3,7 @@ from copy import copy
 from gpiozero import LED, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
 from is_rpi import is_rpi
+from S7Client.S7Client import pls as winCC_piece
 
 
 class MoveControl:
@@ -93,6 +94,7 @@ class MoveControl:
                 if counting_ok_piece:
                     counting_ok_piece = False
                     counter.counter += 1
+                    winCC_piece()
             if i_cyl_2_1:
                 o_cyl_2 = False
 
