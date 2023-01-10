@@ -7,12 +7,12 @@
     },
     "oppened_center": {
         "trackbars": {
-            "kernel": 931
+            "kernel": 879
         }
     },
     "oppened_proc": {
         "trackbars": {
-            "kernel": 787
+            "kernel": 750
         }
     },
     "cropped": {
@@ -36,7 +36,7 @@
     },
     "evaluation": {
         "trackbars": {
-            "thresh": 255
+            "thresh": 133
         }
     }
 }

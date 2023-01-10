@@ -37,7 +37,7 @@ if is_rpi():
     virt_plc = VirtualPLC(ip='127.0.0.1')
     pin_factory = PiGPIOFactory(host='127.0.0.1')
 else:
-    virt_plc = VirtualPLC(ip=rasp_ip)
+    # virt_plc = VirtualPLC(ip=rasp_ip)
     pin_factory = PiGPIOFactory(host=rasp_ip)
 
 
@@ -88,6 +88,7 @@ def run():
         sleep(0.5)
 
 
-t = Thread(target=run)
-t.daemon = True
-t.start()
+if is_rpi():
+    t = Thread(target=run)
+    t.daemon = True
+    t.start()

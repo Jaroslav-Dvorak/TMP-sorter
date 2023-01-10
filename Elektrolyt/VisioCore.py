@@ -358,7 +358,7 @@ class Evaluation:
         self.eval_res = cp(self.blank)
         defects = cv2.countNonZero(defect_img)
         ok_defects = defects < thresh
-        ok_center = (100 < center[0] < 200) and (100 < center[1] < 150)
+        ok_center = (50 < center[0] < 250) and (80 < center[1] < 170)
         cv2.putText(self.eval_res, f"{sensitivity}", (35, 30), self.font, self.fontScale, self.blue, self.lineType)
         cv2.putText(self.eval_res, f"{thresh}<", (10, 60), self.font, self.fontScale, self.blue, self.lineType)
 
